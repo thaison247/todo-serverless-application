@@ -7,7 +7,6 @@ import * as uuid from 'uuid'
 import { deleteAttachment, getUploadUrl } from './attachmentUtils';
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
-// import * as createError from 'http-errors'
 
 const s3BucketName = process.env.ATTACHMENT_S3_BUCKET
 
