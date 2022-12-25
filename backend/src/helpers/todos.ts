@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from 'aws-lambda'
-import { TodoAccess } from './todosAcess'
+import { TodoAccess } from './todosAccess'
 import { TodoItem } from '../models/TodoItem'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { getUserId } from '../lambda/utils';
@@ -11,10 +11,6 @@ import * as uuid from 'uuid'
 
 // // TODO: Implement businessLogic
 const todoAccess = new TodoAccess()
-
-export async function getAllTodos(): Promise<TodoItem[]> {
-  return todoAccess.getAllTodoItems()
-}
 
 export async function createTodo(event: APIGatewayProxyEvent): Promise<TodoItem> {
     const newTodo: CreateTodoRequest = JSON.parse(event.body)
@@ -31,4 +27,12 @@ export async function createTodo(event: APIGatewayProxyEvent): Promise<TodoItem>
     }
 
     return await todoAccess.createTodoItem(todo)
+}
+
+
+export async function getTodosForUser(event: APIGatewayProxyEvent): Promise<TodoItem[]> {
+    let userId = getUserId(event)
+    let todoItems = await todoAccess.getTodoItemsByUserId(userId)
+
+    return todoItems;
 }
