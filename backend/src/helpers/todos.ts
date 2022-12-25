@@ -13,18 +13,17 @@ const s3BucketName = process.env.ATTACHMENT_S3_BUCKET
 const todoAccess = new TodoAccess()
 const logger = createLogger('Todos Business Logic')
 
-export async function createTodo(event: APIGatewayProxyEvent): Promise<TodoItem> {
-    const newTodo: CreateTodoRequest = JSON.parse(event.body)
+export async function createTodo(createTodoRequest: CreateTodoRequest, userId: string): Promise<TodoItem> {
     let todoId = uuid.v4()
     let currentTime = new Date().toISOString()
 
     let todo = {
         todoId: todoId,
         createdAt: currentTime,
-        userId: getUserId(event),
+        userId: userId,
         done: false,
         attachmentUrl: " ",
-        ...newTodo
+        ...createTodoRequest
     }
 
     return await todoAccess.createTodoItem(todo)
