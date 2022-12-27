@@ -1,6 +1,7 @@
+import { PageableTodoList } from '../models/PageableTodoList';
 import * as AWS  from 'aws-sdk'
 import * as AWSXRay from 'aws-xray-sdk'
-import { DocumentClient } from 'aws-sdk/clients/dynamodb'
+import { DocumentClient, Key } from 'aws-sdk/clients/dynamodb'
 import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate';
@@ -37,7 +38,7 @@ export class TodoAccess {
   }
   
 
-  async getTodoItemsByUserId(userId: string): Promise<TodoItem[]> {
+  async getTodoItemsByUserId(userId: string, limit: number, nextKey: Key): Promise<PageableTodoList> {
     logger.info('Getting todo items by userId')
 
     const result = await this.docClient.query({
@@ -46,10 +47,13 @@ export class TodoAccess {
         ExpressionAttributeValues: {
           ':userId': userId
         },
-        ScanIndexForward: false
+        ScanIndexForward: false,
+        Limit: limit,
+        ExclusiveStartKey: nextKey
       }).promise()
     
-      return result.Items as TodoItem[]
+      const items = result.Items as TodoItem[]
+      return {data: items, limit: limit, lastEvaluatedKey: result.LastEvaluatedKey}
   }
 
   

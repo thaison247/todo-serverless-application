@@ -14,9 +14,10 @@ import {
   Loader
 } from 'semantic-ui-react'
 
-import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
+import { createTodo, deleteTodo, getTodos, patchTodo, getMoreTodoItems } from '../api/todos-api'
 import Auth from '../auth/Auth'
 import { Todo } from '../types/Todo'
+import './styles.css'
 
 interface TodosProps {
   auth: Auth
@@ -27,13 +28,15 @@ interface TodosState {
   todos: Todo[]
   newTodoName: string
   loadingTodos: boolean
+  nextKey: any
 }
 
 export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
     todos: [],
     newTodoName: '',
-    loadingTodos: true
+    loadingTodos: true,
+    nextKey: null
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,12 +92,29 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     }
   }
 
+  onTodoMore = async () => {
+    try {
+      this.setState({
+        loadingTodos: true
+      })
+      const moreTodos = await getMoreTodoItems(this.props.auth.getIdToken(), this.state.nextKey)
+      this.setState({
+        todos: [...this.state.todos, ...moreTodos.todos],
+        nextKey: moreTodos.nextKey,
+        loadingTodos: false
+      })
+    } catch {
+      alert('Todo more failed')
+    }
+  }
+
   async componentDidMount() {
     try {
-      const todos = await getTodos(this.props.auth.getIdToken())
+      const response = await getTodos(this.props.auth.getIdToken(), 2)
       this.setState({
-        todos,
-        loadingTodos: false
+        todos: response.todos,
+        loadingTodos: false,
+        nextKey: response.nextKey
       })
     } catch (e) {
       alert(`Failed to fetch todos: ${(e as Error).message}`)
@@ -109,7 +129,27 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         {this.renderCreateTodoInput()}
 
         {this.renderTodos()}
+
+        {this.renderMoreItems()}
       </div>
+    )
+  }
+
+
+  renderMoreItems() {
+    return (
+      <Grid.Row className='load-more-btn'>
+        {this.state.nextKey && (
+          <Button
+            positive
+            onClick={() => this.onTodoMore()}
+          >
+            Load more ...
+          </Button>
+        )}
+
+        {this.state.loadingTodos && (<Loader active inline size='mini'/>)}
+      </Grid.Row>
     )
   }
 
@@ -139,9 +179,9 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   renderTodos() {
-    if (this.state.loadingTodos) {
-      return this.renderLoading()
-    }
+    // if (this.state.loadingTodos) {
+    //   return this.renderLoading()
+    // }
 
     return this.renderTodosList()
   }

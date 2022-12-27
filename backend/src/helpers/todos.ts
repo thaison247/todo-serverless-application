@@ -1,3 +1,4 @@
+import { PageableTodoList } from './../models/PageableTodoList';
 import { TodoItem } from './../models/TodoItem';
 import { APIGatewayProxyEvent } from 'aws-lambda'
 import { TodoAccess } from './todosAccess'
@@ -7,6 +8,7 @@ import * as uuid from 'uuid'
 import { deleteAttachment, getUploadUrl } from './attachmentUtils';
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
+import { Key } from 'aws-sdk/clients/dynamodb'
 
 const s3BucketName = process.env.ATTACHMENT_S3_BUCKET
 
@@ -38,9 +40,9 @@ export async function updateTodo(event: APIGatewayProxyEvent): Promise<void> {
 }
 
 
-export async function getTodosForUser(event: APIGatewayProxyEvent): Promise<TodoItem[]> {
+export async function getTodosForUser(event: APIGatewayProxyEvent, limit: number, nextKey: Key): Promise<PageableTodoList> {
     let userId = getUserId(event)
-    let todoItems = await todoAccess.getTodoItemsByUserId(userId)
+    let todoItems = await todoAccess.getTodoItemsByUserId(userId, limit, nextKey)
 
     return todoItems;
 }
