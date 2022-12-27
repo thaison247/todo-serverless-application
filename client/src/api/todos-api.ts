@@ -90,3 +90,16 @@ export async function getMoreTodoItems(idToken: string, nextKey?: string, limit 
   console.log('More Todos:', response.data)
   return { todos: response.data.data, limit: response.data.limit, nextKey: response.data.lastEvaluatedKey}
 }
+
+export async function getTodoItemById(idToken: string, todoId: string): Promise<Todo> {
+  console.log('Fetching todo by id')
+
+  const response = await Axios.get(`${apiEndpoint}/todos/${todoId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    },
+  })
+  console.log('Todo item:', response.data)
+  return { ...response.data }
+}

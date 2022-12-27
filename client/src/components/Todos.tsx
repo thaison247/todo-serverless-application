@@ -179,10 +179,6 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   }
 
   renderTodos() {
-    // if (this.state.loadingTodos) {
-    //   return this.renderLoading()
-    // }
-
     return this.renderTodosList()
   }
 

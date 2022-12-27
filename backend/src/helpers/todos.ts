@@ -65,3 +65,9 @@ export async function generateUploadUrl(userId: string, todoId: string): Promise
 
     return uploadUrl;
 }
+
+export async function getTodoById(userId: string, todoId: string): Promise<TodoItem> {
+    logger.info('delete TODO item', userId, todoId)
+    let todo = await todoAccess.getTodoItemById(userId, todoId)
+    return todo as TodoItem
+}
