@@ -12,11 +12,11 @@ export const handler = middy(
     const todoId = event.pathParameters.todoId
 
     try {
-      let uploadUrl = await generateUploadUrl(userId, todoId)
+      let uploadUrlResponse = await generateUploadUrl(userId, todoId)
       return {
         statusCode: 200,
         body: JSON.stringify({
-          uploadUrl: uploadUrl
+          ...uploadUrlResponse
         })
       }
     } catch (error) {

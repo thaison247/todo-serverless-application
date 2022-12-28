@@ -1,3 +1,4 @@
+import { GenerateUploadUrlResponse } from './../types/GenerateUploadUrlResponse';
 import { apiEndpoint } from '../config'
 import { Todo } from '../types/Todo';
 import { CreateTodoRequest } from '../types/CreateTodoRequest';
@@ -64,14 +65,17 @@ export async function deleteTodo(
 export async function getUploadUrl(
   idToken: string,
   todoId: string
-): Promise<string> {
+): Promise<GenerateUploadUrlResponse> {
   const response = await Axios.post(`${apiEndpoint}/todos/${todoId}/attachment`, '', {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
     }
   })
-  return response.data.uploadUrl
+
+  console.log("getUploadUrl resp: ", response.data)
+
+  return {uploadUrl: response.data.uploadUrl, attachmentUrl: response.data.attachmentUrl} 
 }
 
 export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {

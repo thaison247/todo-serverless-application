@@ -1,5 +1,6 @@
 import { PageableTodoList } from './../models/PageableTodoList';
 import { TodoItem } from './../models/TodoItem';
+import { GenerateUploadUrlResponse } from './../models/GenerateUploadUrlResponse';
 import { APIGatewayProxyEvent } from 'aws-lambda'
 import { TodoAccess } from './todosAccess'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
@@ -57,13 +58,14 @@ export async function deleteTodo(userId: string, todoId: string): Promise<void> 
     await todoAccess.deleteTodo(userId, todoId)
 }
 
-export async function generateUploadUrl(userId: string, todoId: string): Promise<string> {
+export async function generateUploadUrl(userId: string, todoId: string): Promise<GenerateUploadUrlResponse> {
     let todoItem = await todoAccess.getTodoItemById(userId, todoId)
-    todoItem.attachmentUrl = `https://${s3BucketName}.s3.amazonaws.com/${todoId}`
+    let attachmentUrl = `https://${s3BucketName}.s3.amazonaws.com/${todoId}`
+    todoItem.attachmentUrl = attachmentUrl
     await todoAccess.updateTodoAttachmentUrl(todoItem)
     let uploadUrl = getUploadUrl(todoId)
 
-    return uploadUrl;
+    return {uploadUrl, attachmentUrl};
 }
 
 export async function getTodoById(userId: string, todoId: string): Promise<TodoItem> {

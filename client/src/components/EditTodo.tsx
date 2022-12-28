@@ -1,8 +1,7 @@
 import * as React from 'react'
-import { Form, Button } from 'semantic-ui-react'
+import { Form, Button, Image } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
 import { getTodoItemById, getUploadUrl, patchTodo, uploadFile } from '../api/todos-api'
-import { Todo } from '../types/Todo'
 
 enum UploadState {
   NoUpload,
@@ -61,11 +60,11 @@ export class EditTodo extends React.PureComponent<
       }
 
       this.setUploadState(UploadState.FetchingPresignedUrl)
-      const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.todoId)
+      const {uploadUrl, attachmentUrl} = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.todoId)
 
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)
-
+      this.setFileUrlState(attachmentUrl)
       alert('File was uploaded!')
     } catch (e) {
       alert('Could not upload a file: ' + (e as Error).message)
@@ -77,6 +76,12 @@ export class EditTodo extends React.PureComponent<
   setUploadState(uploadState: UploadState) {
     this.setState({
       uploadState
+    })
+  }
+
+  setFileUrlState(attachmentUrl: string) {
+    this.setState({
+      fileUrl: attachmentUrl
     })
   }
 
@@ -144,9 +149,11 @@ export class EditTodo extends React.PureComponent<
           </Form.Group>
         </Form>
 
+        <Image src={`${this.state.fileUrl}?${Date.now()}`} size='medium' bordered />
+
         <Form onSubmit={this.handleSubmitFile}>
           <Form.Field>
-            <label>File</label>
+            <label>Choose file</label>
             <input
               type="file"
               accept="image/*"
